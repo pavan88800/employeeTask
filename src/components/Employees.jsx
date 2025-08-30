@@ -31,8 +31,8 @@ const Employees = () => {
       const name = item.first_name + " " + item.last_name;
       const department = item.department ? item.department : "";
       return (
-        name.toLowerCase().includes(inputText) ||
-        department.toLowerCase().includes(inputText)
+        name.toLowerCase().includes(inputText.toLowerCase()) ||
+        department.toLowerCase().includes(inputText.toLowerCase())
       );
     });
     setSearchQuery(searchQueryResult);
@@ -87,7 +87,7 @@ const Employees = () => {
       </table>
 
       {inputText.length > 0 && searchQuery.length === 0 ? (
-        <p>Query Not fount</p>
+        <p>Query Not found</p>
       ) : (
         ""
       )}
