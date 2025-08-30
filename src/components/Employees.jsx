@@ -1,16 +1,9 @@
-import { useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { getEmployees } from "../utils";
 
-const Employee = ({
-  first_name,
-  department,
-  age,
-  last_name,
-  id,
-  handleDelete
-}) => {
-  return (
-    <tbody>
+const Employee = memo(
+  ({ first_name, department, age, last_name, id, handleDelete }) => {
+    return (
       <tr>
         <td>{first_name + " " + (last_name ? last_name : "")}</td>
         <td>{department ? department : "---"}</td>
@@ -19,9 +12,10 @@ const Employee = ({
           <button onClick={() => handleDelete(id)}>Delete</button>
         </td>
       </tr>
-    </tbody>
-  );
-};
+    );
+  }
+);
+
 const Employees = () => {
   const [employeeData, setEmployeeData] = useState([]);
   const [inputText, setInputText] = useState("");
@@ -45,16 +39,18 @@ const Employees = () => {
     });
   }, []);
 
-  function handleDelete(id) {
-    const updatedEmployee = employeeData.filter((item) => item.id !== id);
-    setEmployeeData(updatedEmployee);
-  }
-
-  function handleReset() {
+  const handleDelete = useCallback(
+    (id) => {
+      const updatedEmployee = employeeData.filter((item) => item.id !== id);
+      setEmployeeData(updatedEmployee);
+    },
+    [employeeData]
+  );
+  const handleReset = () => {
     getEmployees().then((data) => {
       setEmployeeData(data);
     });
-  }
+  };
   return (
     <div className="container">
       <div className="searchBar">
@@ -74,16 +70,17 @@ const Employees = () => {
             <th scope="col">Action</th>
           </tr>
         </thead>
-
-        {searchQuery.map((employee) => {
-          return (
-            <Employee
-              key={employee.id}
-              {...employee}
-              handleDelete={handleDelete}
-            />
-          );
-        })}
+        <tbody>
+          {searchQuery.map((employee) => {
+            return (
+              <Employee
+                key={employee.id}
+                {...employee}
+                handleDelete={handleDelete}
+              />
+            );
+          })}
+        </tbody>
       </table>
 
       {inputText.length > 0 && searchQuery.length === 0 ? (
