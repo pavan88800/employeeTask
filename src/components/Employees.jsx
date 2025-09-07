@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { getEmployees } from "../utils";
 
 const Employee = memo(
@@ -19,23 +19,28 @@ const Employee = memo(
 const Employees = () => {
   const [employeeData, setEmployeeData] = useState([]);
   const [inputText, setInputText] = useState("");
-  const [searchQuery, setSearchQuery] = useState(employeeData);
-  useEffect(() => {
-    const searchQueryResult = employeeData.filter((item) => {
-      const name = item.first_name + " " + item.last_name;
-      const department = item.department ? item.department : "";
-      return (
-        name.toLowerCase().includes(inputText.toLowerCase()) ||
-        department.toLowerCase().includes(inputText.toLowerCase())
-      );
-    });
-    setSearchQuery(searchQueryResult);
-  }, [inputText, employeeData]);
+  let initialData = useRef([]);
+
+  const transformData = employeeData.map((employee) => {
+    return {
+      ...employee,
+      name: `${employee.first_name} ${employee.last_name}`
+    };
+  });
+
+  const employeeFilteredData = transformData.filter((item) => {
+    return Object.keys(item)
+      .filter((id) => id !== "id")
+      .some((key) => {
+        let value = item[key];
+        return String(value).toLowerCase().includes(inputText.toLowerCase());
+      });
+  });
 
   useEffect(() => {
     getEmployees().then((data) => {
       setEmployeeData(data);
-      setSearchQuery(data);
+      initialData.current = data;
     });
   }, []);
 
@@ -47,10 +52,9 @@ const Employees = () => {
     [employeeData]
   );
   const handleReset = () => {
-    getEmployees().then((data) => {
-      setEmployeeData(data);
-    });
+    setEmployeeData(initialData.current);
   };
+
   return (
     <div className="container">
       <div className="searchBar">
@@ -71,7 +75,7 @@ const Employees = () => {
           </tr>
         </thead>
         <tbody>
-          {searchQuery.map((employee) => {
+          {employeeFilteredData.map((employee) => {
             return (
               <Employee
                 key={employee.id}
@@ -83,7 +87,7 @@ const Employees = () => {
         </tbody>
       </table>
 
-      {inputText.length > 0 && searchQuery.length === 0 ? (
+      {inputText.length > 0 && employeeData.length === 0 ? (
         <p>Query Not found</p>
       ) : (
         ""

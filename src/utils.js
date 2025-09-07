@@ -8,7 +8,13 @@ export async function getEmployees() {
       department: "Engineering",
       age: 29
     },
-    { id: 2, first_name: "Smith", last_name: null, department: null, age: 41 },
+    {
+      id: "xxx",
+      first_name: "Smith",
+      last_name: null,
+      department: null,
+      age: 41
+    },
     {
       id: 3,
       first_name: "Ivy",
